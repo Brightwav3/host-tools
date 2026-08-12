@@ -6,15 +6,31 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Host Tools declares tool-system as a file: sibling, so a standalone checkout
+# has nothing to resolve it against. The sibling is fetched and built here
+# rather than vendored, so this job verifies against the same source the
+# integration build uses.
 jobs:
   verify:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: host-tools
+      - uses: actions/checkout@v4
+        with:
+          repository: Brightwav3/tool-system
+          ref: main
+          path: tool-system
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Build tool-system
+        working-directory: tool-system
+        run: npm install --no-audit --no-fund && npm run build
       - name: Install dependencies
-        run: npm ci || npm install
+        working-directory: host-tools
+        run: npm install --no-audit --no-fund
       - name: Verify
+        working-directory: host-tools
         run: npm run verify
