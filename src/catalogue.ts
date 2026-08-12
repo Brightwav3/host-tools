@@ -12,10 +12,15 @@ import type { ToolError, ToolRegistry } from "tool-system";
 import type { HttpBroker, ScreenCapture, SystemProbe, VolumeControl } from "./services.js";
 import { openUrlDeclaration, openUrlHandler, setVolumeDeclaration, setVolumeHandler, type OpenUrlConfig } from "./tools/host-control.js";
 import { screenCaptureDeclaration, screenCaptureHandler } from "./tools/screen-capture.js";
+import { calculateDeclaration, calculateHandler, getTimeDeclaration, getTimeHandler, systemClock, uptimeDeclaration, uptimeHandler, type Clock, type UptimeSource } from "./tools/simple.js";
 import { systemStatusDeclaration, systemStatusHandler } from "./tools/system-status.js";
 import { weatherDeclaration, weatherHandler, webSearchDeclaration, webSearchHandler, type WeatherConfig, type WebSearchConfig } from "./tools/web-search.js";
 
 export interface CatalogueConfig {
+  /** Cheap capabilities install by default; pass false to leave them out. */
+  readonly simple?: boolean;
+  readonly clock?: Clock;
+  readonly uptime?: UptimeSource;
   readonly system?: SystemProbe;
   readonly volume?: VolumeControl;
   readonly screen?: ScreenCapture;
@@ -49,6 +54,17 @@ export function installCatalogue(registry: ToolRegistry, config: CatalogueConfig
       failed.push(error);
     }
   };
+
+  // These need nothing configured, so they are present unless refused. A
+  // catalogue whose useful entries all require setup is one nobody turns on.
+  if (config.simple !== false) {
+    add("get_time", () => registry.register(getTimeDeclaration(), getTimeHandler(config.clock ?? systemClock)));
+    add("calculate", () => registry.register(calculateDeclaration(), calculateHandler()));
+    if (config.uptime) {
+      const source = config.uptime;
+      add("uptime", () => registry.register(uptimeDeclaration(), uptimeHandler(source)));
+    }
+  }
 
   if (config.system) {
     const probe = config.system;

@@ -4,13 +4,23 @@
   "private": true,
   "description": "Concrete host capabilities declared against the Tool System contract.",
   "type": "module",
-  "exports": { ".": { "types": "./dist/src/index.d.ts", "import": "./dist/src/index.js" } },
-  "bin": { "host-tools": "./dist/cli/main.js" },
-  "engines": { "node": ">=22" },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "bin": {
+    "host-tools": "./dist/cli/main.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "test": "node --import tsx --test tests/**/*.test.ts",
+    "demo": "node --import tsx scripts/demo.ts",
     "verify": "npm run typecheck && npm test && npm run build && node dist/cli/main.js list --json"
   },
   "dependencies": {

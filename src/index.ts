@@ -26,3 +26,9 @@ export { weatherDeclaration, weatherHandler, webSearchDeclaration, webSearchHand
 export type { OpenUrlConfig } from "./tools/host-control.js";
 export { openUrlDeclaration, openUrlHandler, setVolumeDeclaration, setVolumeHandler } from "./tools/host-control.js";
 export { screenCaptureDeclaration, screenCaptureHandler } from "./tools/screen-capture.js";
+
+export type { Clock, UptimeSource } from "./tools/simple.js";
+export { calculateDeclaration, calculateHandler, getTimeDeclaration, getTimeHandler, systemClock, uptimeDeclaration, uptimeHandler } from "./tools/simple.js";
+
+export type { NodeSystemProbeOptions } from "./hosts/node.js";
+export { nodeSystemProbe, nodeUptimeSource } from "./hosts/node.js";

@@ -19,7 +19,7 @@ test("list reports every capability the catalogue can install", async () => {
   const { code, json } = await cli(["list"]);
   assert.equal(code, 0);
   assert.equal(json.name, "host-tools");
-  assert.equal(json.installed.length, 6);
+  assert.equal(json.installed.length, 9);
   assert.deepEqual(json.failed, []);
 });
 

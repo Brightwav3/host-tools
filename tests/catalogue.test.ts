@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import test from "node:test";
 
 import {
@@ -16,7 +16,7 @@ import { installCatalogue } from "../src/catalogue.js";
 import { AllowlistHttpBroker, type HttpResponse } from "../src/services.js";
 
 const CITIES = ["prague", "london"] as const;
-const ALL = ["system_status", "web_search", "weather_report", "open_url", "set_volume", "screen_capture"];
+const ALL = ["get_time", "calculate", "uptime", "system_status", "web_search", "weather_report", "open_url", "set_volume", "screen_capture"];
 
 function harness(options: { body?: string; status?: number } = {}) {
   const launched: BrokerLaunch[] = [];
@@ -32,6 +32,8 @@ function harness(options: { body?: string; status?: number } = {}) {
 
   const registry = new ToolRegistry();
   const report = installCatalogue(registry, {
+    clock: { now: () => new Date("2026-08-12T21:45:00.000Z") },
+    uptime: { seconds: () => 200_000 },
     system: { read: async () => ({ cpuPercent: 12.4, memoryUsedPercent: 63.7, uptimeSeconds: 7_260 }) },
     volume: { set: async () => {} },
     screen: { begin: async () => ({ captureId: "cap-1" }) },
@@ -74,16 +76,29 @@ test("a capability whose service is absent is simply not installed", () => {
   const registry = new ToolRegistry();
   const report = installCatalogue(registry, { volume: { set: async () => {} } });
 
-  assert.deepEqual(report.installed, ["set_volume"]);
-  assert.equal(registry.discover().length, 1);
+  assert.deepEqual(report.installed, ["get_time", "calculate", "set_volume"]);
+  assert.equal(registry.discover().length, 3);
 });
 
-test("nothing is registered when no services are supplied", () => {
+test("with no services supplied, only capabilities that cannot affect anything install", () => {
   const registry = new ToolRegistry();
   const report = installCatalogue(registry, {});
 
-  assert.deepEqual(report.installed, []);
-  assert.equal(registry.size, 0, "importing the catalogue must not grant capability");
+  // Installing by default is safe here precisely because these capabilities
+  // have no service to act through: every one is read_only and answers from
+  // the clock or from its own arguments. Anything that can reach the world
+  // still requires the host to hand it the means.
+  assert.deepEqual(report.installed, ["get_time", "calculate"]);
+  for (const declaration of registry.discover()) {
+    assert.equal(declaration.sideEffect, "read_only", `${declaration.name} must be effect-free to install by default`);
+  }
+});
+
+test("importing the catalogue grants nothing; installing is an explicit call", () => {
+  const registry = new ToolRegistry();
+  assert.equal(registry.size, 0);
+  assert.deepEqual(installCatalogue(registry, { simple: false }).installed, []);
+  assert.equal(registry.size, 0);
 });
 
 /* Each capability -------------------------------------------------------- */
@@ -213,8 +228,12 @@ test("the http broker takes a host and a path, never a composed URL", async () =
 
 /* The invariant that keeps all of this true -------------------------------- */
 
-test("no capability imports a process, filesystem, network, or automation primitive", () => {
-  const forbidden = /from\s+"(node:child_process|node:fs|node:https?|node:net|child_process|fs|axios|puppeteer|robotjs)"/;
+test("only the host adapter directory may touch a platform module", () => {
+  // The rule that keeps this catalogue testable and auditable: a capability
+  // reaches the host through an injected service, never directly. Confining
+  // every platform import to src/hosts makes that checkable by reading one
+  // directory instead of trusting every handler.
+  const platform = /from\s+"(node:[a-z_]+|child_process|fs|axios|puppeteer|robotjs)"/;
   const files: string[] = [];
 
   const walk = (dir: string): void => {
@@ -226,10 +245,15 @@ test("no capability imports a process, filesystem, network, or automation primit
   };
   walk("src");
 
-  assert.ok(files.length >= 6, "expected the catalogue source to be present");
-  for (const file of files) {
+  const capabilities = files.filter((file) => !file.includes(`hosts${sep}`));
+  const adapters = files.filter((file) => file.includes(`hosts${sep}`));
+
+  assert.ok(capabilities.length >= 6, "expected the catalogue source to be present");
+  assert.ok(adapters.length >= 1, "expected at least one host adapter");
+
+  for (const file of capabilities) {
     const source = readFileSync(file, "utf8");
-    assert.equal(forbidden.test(source), false, `${file} must reach the host only through injected services`);
+    assert.equal(platform.test(source), false, `${file} must reach the host only through injected services`);
     assert.equal(/\bfetch\s*\(/.test(source), false, `${file} must not call fetch directly`);
   }
 });

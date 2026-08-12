@@ -14,6 +14,8 @@ import { CATALOGUE_VERSION, PACKAGE_NAME, installCatalogue } from "../src/index.
 
 /** Stub services: enough to produce every declaration, incapable of any effect. */
 const INERT = {
+  clock: { now: () => new Date(0) },
+  uptime: { seconds: () => 0 },
   system: { read: async () => ({ cpuPercent: 0, memoryUsedPercent: 0, uptimeSeconds: 0 }) },
   volume: { set: async () => {} },
   screen: { begin: async () => ({ captureId: "" }) },
