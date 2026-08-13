@@ -1,5 +1,10 @@
 # Host Tools
 
+[![CI](https://github.com/Brightwav3/host-tools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Brightwav3/host-tools/actions/workflows/ci.yml)
+[![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Part of Assistant Mark I](https://img.shields.io/badge/Part%20of-Assistant%20Mark%20I-6f42c1)](https://github.com/Brightwav3/Assistant-mark-I)
+
 Concrete capabilities, declared against the [Tool System](../tool-system) contract, that a model can invoke without any of them reaching the host directly.
 
 Tool System defines what a tool *is* — schema, outcomes, guards, policy, brokered execution. This repository defines what the tools *are*.
