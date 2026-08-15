@@ -5,6 +5,11 @@
  * capabilities those services support. Nothing is registered by default: a
  * catalogue that installs itself would grant capability by being imported,
  * which is the same failure as a policy that permits by omission.
+ *
+ * INV-001 — this catalogue is the home for capabilities that answer within
+ * their turn. One that cannot goes through the Delegation Broker instead.
+ * ADR 0002 — docs/decisions/0002-installation-grants-nothing.md
+ * Ecosystem ADR 0001 — ../docs/decisions/0001-capability-homes.md
  */
 
 import type { ToolError, ToolRegistry } from "tool-system";

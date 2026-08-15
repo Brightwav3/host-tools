@@ -5,6 +5,8 @@
  * no host effect travels the same pipeline as one that launches a process. Its
  * side-effect class is `read_only`, so a policy can permit it without
  * permitting anything else.
+ *
+ * ADR 0001 — docs/decisions/0001-factories-not-stateful-modules.md
  */
 
 import { toolError, type ExecutionOutcome, type ToolDeclaration, type ToolHandler } from "tool-system";

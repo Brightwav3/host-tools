@@ -6,6 +6,8 @@
  * and falls back to typing into the Start menu. Here `open_url` hands a browser
  * an argv array containing a URL whose host was checked against a catalogue,
  * and `set_volume` can only move one number inside a declared range.
+ *
+ * ADR 0001 — docs/decisions/0001-factories-not-stateful-modules.md
  */
 
 import { toolError, type ExecutionOutcome, type ToolDeclaration, type ToolHandler } from "tool-system";

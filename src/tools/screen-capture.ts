@@ -11,6 +11,11 @@
  * air. There it is a magic string the model is told to interpret; here it is a
  * declared outcome variant, so every slow capability gets the same treatment
  * without inventing its own convention.
+ *
+ * A continuation is still synchronous under INV-001: the acknowledgement is
+ * immediate and the runtime owns the wait, so this stays a host tool rather
+ * than becoming a delegated capability.
+ * ADR 0001 — docs/decisions/0001-factories-not-stateful-modules.md
  */
 
 import { toolError, type ExecutionOutcome, type ToolDeclaration, type ToolHandler } from "tool-system";
