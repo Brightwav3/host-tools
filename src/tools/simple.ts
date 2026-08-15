@@ -9,6 +9,8 @@
  *
  * All of them are `read_only`, so a policy can permit the whole group without
  * permitting anything that touches the world.
+ *
+ * ADR 0001 — docs/decisions/0001-factories-not-stateful-modules.md
  */
 
 import { toolError, type ExecutionOutcome, type ToolDeclaration, type ToolHandler } from "tool-system";

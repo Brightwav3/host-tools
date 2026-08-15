@@ -5,6 +5,10 @@
  * interfaces. A capability never imports `child_process`, `fs`, `fetch`, or an
  * automation library, which is what makes the whole catalogue testable without
  * a host and auditable without reading every handler.
+ *
+ * INV-003 — every host effect passes one brokered, deniable place, and no
+ * service accepts a composed instruction where it can accept parts.
+ * ADR 0001 — docs/decisions/0001-factories-not-stateful-modules.md
  */
 
 import { toolError, type ToolError } from "tool-system";

@@ -5,6 +5,8 @@
  * `external`. That marking is the whole reason these are worth having in the
  * catalogue early: they are the first capabilities whose output must not be
  * allowed to read as instruction.
+ *
+ * ADR 0001 — docs/decisions/0001-factories-not-stateful-modules.md
  */
 
 import { toolError, type ExecutionOutcome, type ToolDeclaration, type ToolHandler } from "tool-system";
