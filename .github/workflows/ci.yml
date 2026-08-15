@@ -6,31 +6,47 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Host Tools declares tool-system as a file: sibling, so a standalone checkout
-# has nothing to resolve it against. The sibling is fetched and built here
-# rather than vendored, so this job verifies against the same source the
-# integration build uses.
+# Host Tools declares tool-system as a `file:` sibling, so a standalone checkout has
+# nothing to resolve it against.
+#
+# The sibling comes from the meta-repository's pinned submodule commit rather than
+# from tool-system's default branch. A submodule pointer is the record of which
+# versions are declared to work together; checking out whatever `main` happens to be
+# means a green run proves the combination worked at that moment, not that this
+# commit is sound — and it makes an unrelated change in a sibling able to fail this
+# repository's CI.
+#
+# If a change here needs a newer tool-system than the meta-repository records, this
+# job fails. That is correct: advance the submodule pointer, which is the step that
+# declares the new combination.
 jobs:
   verify:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the declared ecosystem
+        uses: actions/checkout@v4
         with:
-          path: host-tools
-      - uses: actions/checkout@v4
+          repository: Brightwav3/Assistant-mark-II
+          submodules: recursive
+          path: eco
+
+      - name: Overlay the commit under test
+        uses: actions/checkout@v4
         with:
-          repository: Brightwav3/tool-system
-          ref: main
-          path: tool-system
+          path: eco/host-tools
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Build tool-system
-        working-directory: tool-system
+        working-directory: eco/tool-system
         run: npm install --no-audit --no-fund && npm run build
+
       - name: Install dependencies
-        working-directory: host-tools
+        working-directory: eco/host-tools
         run: npm install --no-audit --no-fund
+
       - name: Verify
-        working-directory: host-tools
+        working-directory: eco/host-tools
         run: npm run verify
